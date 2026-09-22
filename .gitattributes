@@ -1,0 +1,7 @@
+# Regola AGENTS.md §1 per file .meta di Unity
+*.meta merge=union
+
+# Tratta i file di scena e asset come binari per evitare merge corrupt
+*.unity binary
+*.prefab binary
+*.asset binary
