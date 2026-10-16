@@ -44,11 +44,12 @@ namespace MobileGame.Entities
         }
 
         /// <summary>
-        /// Inizializza e lancia il proiettile di ghiaccio nella direzione bersaglio.
+        /// Inizializza e lancia il proiettile di ghiaccio nella direzione bersaglio con eventuale danno scalato.
         /// </summary>
-        public void Launch(Vector2 startPos, Vector2 direction, System.Action<IceProjectile> onExpired)
+        public void Launch(Vector2 startPos, Vector2 direction, System.Action<IceProjectile> onExpired, float damage = 8f)
         {
             transform.position = startPos;
+            _damage            = damage;
             _direction         = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.down;
             _timer             = 0f;
             _onExpired         = onExpired;

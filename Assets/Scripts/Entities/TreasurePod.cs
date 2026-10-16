@@ -36,6 +36,7 @@ namespace MobileGame.Entities
         private float   _crumbleTimer;
         private float   _pulseTimer;
         private Vector3 _baseScale = new Vector3(0.50f, 0.50f, 1f);
+        private bool    _hasDiedAndReleased;
 
         private const float FLASH_DURATION   = 0.085f;
         private const float CRUMBLE_DURATION = 0.30f;
@@ -103,8 +104,9 @@ namespace MobileGame.Entities
 
         public void Initialize(Vector2 spawnPosition, System.Action<TreasurePod> onDied)
         {
-            transform.position = spawnPosition;
-            _onDied = onDied;
+            transform.position  = spawnPosition;
+            _onDied              = onDied;
+            _hasDiedAndReleased = false;
 
             _isDying      = false;
             _flashTimer   = 0f;
@@ -218,8 +220,16 @@ namespace MobileGame.Entities
 
         private void FinishDeath()
         {
+            if (_hasDiedAndReleased) return;
+            _hasDiedAndReleased = true;
+
             _isDying = false;
-            _onDied?.Invoke(this);
+            if (_collider != null) _collider.enabled = false;
+            gameObject.SetActive(false);
+
+            var cb = _onDied;
+            _onDied = null;
+            cb?.Invoke(this);
         }
     }
 }

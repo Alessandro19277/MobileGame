@@ -85,11 +85,12 @@ namespace MobileGame.Entities
         }
 
         /// <summary>
-        /// Inizializza e lancia la spora nella direzione bersaglio.
+        /// Inizializza e lancia la spora nella direzione bersaglio con eventuale danno scalato.
         /// </summary>
-        public void Launch(Vector2 startPos, Vector2 direction, System.Action<BossSporeProjectile> onExpired)
+        public void Launch(Vector2 startPos, Vector2 direction, System.Action<BossSporeProjectile> onExpired, float damage = 12f)
         {
             transform.position = startPos;
+            _damage            = damage;
             _direction         = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.down;
             _timer             = 0f;
             _onExpired         = onExpired;

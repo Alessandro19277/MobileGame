@@ -286,13 +286,13 @@ namespace MobileGame.UI
                 new UpgradeOption
                 {
                     Title       = "BIO-RIGENERAZIONE",
-                    Description = "Rigenera passivamente +2 HP ogni secondo",
+                    Description = "Rigenera passivamente +1 HP/sec (max 2.5 HP/sec)",
                     Rarity      = UpgradeRarity.Rare,
                     Apply       = () =>
                     {
                         var p = GameObject.FindWithTag("Player");
                         var h = p?.GetComponent<HealthComponent>();
-                        if (h != null) h.RegenPerSecond += 2f;
+                        if (h != null) h.RegenPerSecond = Mathf.Min(2.5f, h.RegenPerSecond + 1.0f);
                     }
                 },
                 new UpgradeOption
@@ -325,7 +325,7 @@ namespace MobileGame.UI
                 new UpgradeOption
                 {
                     Title       = "NANO-CORAZZA TITANICA",
-                    Description = "-25% a tutti i danni subiti + 50 HP Max",
+                    Description = "-15% a tutti i danni subiti (max 35%) + 35 HP Max",
                     Rarity      = UpgradeRarity.Epic,
                     Apply       = () =>
                     {
@@ -333,8 +333,8 @@ namespace MobileGame.UI
                         var h = p?.GetComponent<HealthComponent>();
                         if (h != null)
                         {
-                            h.DamageReductionPercent = Mathf.Clamp(h.DamageReductionPercent + 0.25f, 0f, 0.70f);
-                            h.IncreaseMaxHealth(50f);
+                            h.DamageReductionPercent = Mathf.Clamp(h.DamageReductionPercent + 0.15f, 0f, 0.35f);
+                            h.IncreaseMaxHealth(35f);
                         }
                     }
                 },
@@ -377,7 +377,7 @@ namespace MobileGame.UI
                 new UpgradeOption
                 {
                     Title       = "PROTOCOLLO IMMORTALE",
-                    Description = "+1 Rianimazione istantanea se muori + 4 HP/sec!",
+                    Description = "+1 Rianimazione d'emergenza (max 1) e +1.5 HP/sec!",
                     Rarity      = UpgradeRarity.Legendary,
                     Apply       = () =>
                     {
@@ -385,8 +385,8 @@ namespace MobileGame.UI
                         var h = p?.GetComponent<HealthComponent>();
                         if (h != null)
                         {
-                            h.RevivesRemaining++;
-                            h.RegenPerSecond += 4f;
+                            h.RevivesRemaining = Mathf.Min(1, h.RevivesRemaining + 1);
+                            h.RegenPerSecond   = Mathf.Min(2.5f, h.RegenPerSecond + 1.5f);
                         }
                     }
                 },
@@ -404,7 +404,7 @@ namespace MobileGame.UI
                 new UpgradeOption
                 {
                     Title       = "BARRIERA ASSOLUTA",
-                    Description = "Sfere + Shockwave potenziati e -20% Danno subito!",
+                    Description = "Sfere + Shockwave potenziati e -10% Danno subito!",
                     Rarity      = UpgradeRarity.Legendary,
                     Apply       = () =>
                     {
@@ -414,7 +414,7 @@ namespace MobileGame.UI
                         var h = p?.GetComponent<HealthComponent>();
                         if (h != null)
                         {
-                            h.DamageReductionPercent = Mathf.Clamp(h.DamageReductionPercent + 0.20f, 0f, 0.70f);
+                            h.DamageReductionPercent = Mathf.Clamp(h.DamageReductionPercent + 0.10f, 0f, 0.35f);
                         }
                     }
                 }

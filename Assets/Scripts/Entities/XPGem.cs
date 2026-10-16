@@ -10,8 +10,8 @@ namespace MobileGame.Entities
     [RequireComponent(typeof(CircleCollider2D))]
     public class XPGem : MonoBehaviour
     {
-        [SerializeField] private float _baseMagnetRange = 3f;
-        [SerializeField] private float _magnetSpeed     = 8f;
+        [SerializeField] private float _baseMagnetRange = 4.0f;
+        [SerializeField] private float _magnetSpeed     = 9.5f;
 
         private int                  _xpValue;
         private System.Action<XPGem> _onCollected;

@@ -101,8 +101,18 @@ namespace MobileGame.Core
 
         private void ReturnGem(XPGem gem) => _gemPool.Release(gem);
 
-        /// <summary>Soglia XP: cresce ~30% per livello.</summary>
+        /// <summary>
+        /// Curva di progressione XP bilanciata:
+        /// Il livello 2 richiede 35 XP (~3-4 nemici abbattuti, circa 10-12s di gioco),
+        /// poi cresce in modo stimolante senza sovraccaricare subito il giocatore di carte.
+        /// </summary>
         private static int CalculateThreshold(int level)
-            => Mathf.RoundToInt(100f * Mathf.Pow(level, 1.3f));
+        {
+            if (level <= 1) return 35;
+            if (level == 2) return 80;
+            if (level == 3) return 150;
+            if (level == 4) return 240;
+            return Mathf.RoundToInt(45f * Mathf.Pow(level, 1.38f));
+        }
     }
 }

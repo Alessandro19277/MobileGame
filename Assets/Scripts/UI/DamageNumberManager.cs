@@ -18,6 +18,24 @@ namespace MobileGame.UI
         private System.Action<DamageNumber> _returnCallback;
         private Transform                 _container;
 
+        private static TMP_FontAsset s_fontAsset;
+
+        public static TMP_FontAsset GetFontAsset()
+        {
+            if (s_fontAsset != null) return s_fontAsset;
+
+            s_fontAsset = Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
+            if (s_fontAsset == null)
+            {
+                s_fontAsset = TMP_Settings.defaultFontAsset;
+            }
+            if (s_fontAsset == null)
+            {
+                s_fontAsset = Resources.Load<TMP_FontAsset>("Fonts/PressStart2P-Regular SDF");
+            }
+            return s_fontAsset;
+        }
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -36,16 +54,19 @@ namespace MobileGame.UI
                 factory: () =>
                 {
                     var go = new GameObject("DamageNumber");
+                    go.SetActive(false); // Inattivo prima di aggiungere TextMeshPro per evitare HandleUtility mesh generation warning
                     go.transform.SetParent(_container);
 
                     var tmp = go.AddComponent<TextMeshPro>();
-                    tmp.alignment   = TextAlignmentOptions.Center;
+                    var font = GetFontAsset();
+                    if (font != null) tmp.font = font;
+
+                    tmp.alignment    = TextAlignmentOptions.Center;
                     tmp.sortingOrder = 10;
                     tmp.outlineWidth = 0.28f;
                     tmp.outlineColor = Color.black;
 
                     var dn = go.AddComponent<DamageNumber>();
-                    go.SetActive(false);
                     return dn;
                 },
                 onGet:     dn => dn.gameObject.SetActive(true),

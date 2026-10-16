@@ -35,17 +35,21 @@ namespace MobileGame.Entities
         private float           _actionTimer;
         private Vector2         _dashDirection;
 
-        private int  _wave;
-        private bool _isApexBoss;
-        private bool _isEnraged;
-        private int  _dashesDoneInChain;
-        private int  _maxDashesInChain = 1;
+        private int   _wave;
+        private int   _tier = 1;
+        private bool  _isApexBoss;
+        private bool  _isEnraged;
+        private int   _dashesDoneInChain;
+        private int   _maxDashesInChain = 1;
         private float _activeDashCooldown;
+        private float _sporeDamage = 12f;
 
-        // Palette cromatica
-        private static readonly Color COLOR_WAVE5_CRIMSON  = new Color(0.95f, 0.12f, 0.38f, 1.0f);
-        private static readonly Color COLOR_APEX_MAGENTA   = new Color(0.88f, 0.08f, 0.95f, 1.0f);
-        private static readonly Color COLOR_ENRAGED_ALERT  = new Color(1.00f, 0.15f, 0.15f, 1.0f);
+        // Palette cromatica dinamica per Tier
+        private static readonly Color COLOR_WAVE5_CRIMSON    = new Color(0.95f, 0.12f, 0.38f, 1.0f);
+        private static readonly Color COLOR_APEX_MAGENTA     = new Color(0.88f, 0.08f, 0.95f, 1.0f);
+        private static readonly Color COLOR_ABYSSAL_PURPLE   = new Color(0.42f, 0.05f, 0.95f, 1.0f);
+        private static readonly Color COLOR_OMEGA_BLACK_CORE = new Color(0.16f, 0.04f, 0.28f, 1.0f);
+        private static readonly Color COLOR_ENRAGED_ALERT    = new Color(1.00f, 0.15f, 0.15f, 1.0f);
 
         // 8 Direzioni radiali pre-calcolate (zero boxing o calcoli trigonometrici in loop)
         private static readonly Vector2[] SPORE_DIRECTIONS = new Vector2[8]
@@ -114,30 +118,52 @@ namespace MobileGame.Entities
             base.Initialize(player, wave, onDied);
 
             _wave       = wave;
-            _isApexBoss = wave >= 10;
+            _tier       = Mathf.Max(1, wave / 5);
+            _isApexBoss = _tier >= 2;
             _isEnraged  = false;
 
             _state             = BossActionState.Stalking;
             _actionTimer       = 0f;
             _dashesDoneInChain = 0;
 
-            if (_isApexBoss)
+            // Statistiche dinamiche progressive per Tier (Wave 5, 10, 15, 20, 25...)
+            float bossHealth;
+            if (_tier == 1)      bossHealth = 450f;
+            else if (_tier == 2) bossHealth = 1400f;
+            else if (_tier == 3) bossHealth = 2900f;
+            else if (_tier == 4) bossHealth = 5000f;
+            else                 bossHealth = 5000f + (_tier - 4) * 2500f;
+
+            _health.SetMaxHealth(bossHealth);
+
+            // Danno da contatto progressivo (37 alla Wave 5 fino a 76+ alla Wave 20+)
+            _contactDamage = 24f + _tier * 13f;
+
+            // Danno delle spore tossiche
+            _sporeDamage = 10f + _tier * 3.5f;
+
+            // Configurazione combo di scatto e dimensioni per Tier
+            if (_tier >= 3)
             {
-                // Statistiche potenziate per il boss della Wave 10+
-                _health.SetMaxHealth(1200f);
+                // Wave 15+ (Abyssal / Omega): triplo scatto a catena e cooldown ridotto
+                transform.localScale  = _initialLocalScale * (1.30f + Mathf.Min(0.30f, (_tier - 3) * 0.10f));
+                _xpGemsDropCount      = 16 + (_tier - 2) * 6; // 22 a Wave 15, 28 a Wave 20
+                _maxDashesInChain     = 3; // Triplo scatto a catena!
+                _activeDashCooldown   = Mathf.Max(2.2f, 2.8f - (_tier - 3) * 0.3f);
+            }
+            else if (_tier == 2)
+            {
+                // Wave 10 (Apex): doppio scatto
                 transform.localScale  = _initialLocalScale * 1.25f;
-                _contactDamage        = 45f;
                 _xpGemsDropCount      = 14;
-                _maxDashesInChain     = 2; // Doppio scatto a catena
+                _maxDashesInChain     = 2; // Doppio scatto
                 _activeDashCooldown   = _apexDashCooldown;
             }
             else
             {
-                // Statistiche standard per la Wave 5
-                _health.SetMaxHealth(350f);
+                // Wave 5 (Mega Pathogen): scatto singolo
                 transform.localScale  = _initialLocalScale;
-                _contactDamage        = 30f;
-                _xpGemsDropCount      = 5;
+                _xpGemsDropCount      = 6;
                 _maxDashesInChain     = 1;
                 _activeDashCooldown   = _baseDashCooldown;
             }
@@ -149,7 +175,10 @@ namespace MobileGame.Entities
         {
             if (_sr != null)
             {
-                _sr.color = _isApexBoss ? COLOR_APEX_MAGENTA : COLOR_WAVE5_CRIMSON;
+                if (_tier >= 4)      _sr.color = COLOR_OMEGA_BLACK_CORE;
+                else if (_tier == 3) _sr.color = COLOR_ABYSSAL_PURPLE;
+                else if (_tier == 2) _sr.color = COLOR_APEX_MAGENTA;
+                else                 _sr.color = COLOR_WAVE5_CRIMSON;
             }
         }
 
@@ -163,7 +192,8 @@ namespace MobileGame.Entities
             if (_isEnraged && _sr != null && _flashTimer <= 0f)
             {
                 float pulse = (Mathf.Sin(Time.time * 9.5f) + 1f) * 0.5f;
-                _sr.color = Color.Lerp(COLOR_ENRAGED_ALERT, COLOR_APEX_MAGENTA, pulse);
+                Color baseCol = _tier >= 4 ? COLOR_OMEGA_BLACK_CORE : (_tier == 3 ? COLOR_ABYSSAL_PURPLE : COLOR_APEX_MAGENTA);
+                _sr.color = Color.Lerp(COLOR_ENRAGED_ALERT, baseCol, pulse);
             }
         }
 
@@ -316,7 +346,7 @@ namespace MobileGame.Entities
             for (int i = 0; i < SPORE_DIRECTIONS.Length; i++)
             {
                 BossSporeProjectile spore = s_sporePool.Get();
-                spore.Launch(origin, SPORE_DIRECTIONS[i], s_returnSporeCallback);
+                spore.Launch(origin, SPORE_DIRECTIONS[i], s_returnSporeCallback, _sporeDamage);
             }
         }
 
@@ -344,6 +374,8 @@ namespace MobileGame.Entities
         protected override Color GetThemeColor()
         {
             if (_isEnraged) return COLOR_ENRAGED_ALERT;
+            if (_tier >= 4) return COLOR_OMEGA_BLACK_CORE;
+            if (_tier == 3) return COLOR_ABYSSAL_PURPLE;
             return _isApexBoss ? COLOR_APEX_MAGENTA : COLOR_WAVE5_CRIMSON;
         }
     }

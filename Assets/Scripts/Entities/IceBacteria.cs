@@ -39,6 +39,7 @@ namespace MobileGame.Entities
         private float   _animTimer;
         private int     _animFrame;
         private Vector2 _targetDirection;
+        private float   _projectileDamage = 8f;
 
         // Pool condiviso per i proiettili criogenici (zero GC)
         private static ObjectPool<IceProjectile> s_projPool;
@@ -59,10 +60,12 @@ namespace MobileGame.Entities
             if (col != null) col.radius = 0.30f;
 
             // Statistiche default per il nemico di ghiaccio
-            _baseSpeed       = 1.9f;
-            _contactDamage   = 10f;
-            _scoreValue      = 25;
-            _xpGemsDropCount = 2;
+            _baseSpeed         = 1.9f;
+            _contactDamage     = 10f;
+            _baseContactDamage = 10f;
+            _baseMaxHealth     = _baseHealth;
+            _scoreValue        = 25;
+            _xpGemsDropCount   = 2;
 
             LoadSprites();
             EnsureProjectilePool();
@@ -132,11 +135,8 @@ namespace MobileGame.Entities
             base.Initialize(player, wave, onDied);
             transform.localScale = new Vector3(0.42f, 0.42f, 1f);
 
-            // Più vita di microbi base (30) e virus (20), con scaling progressivo per wave
-            if (_health != null)
-            {
-                _health.SetMaxHealth(_baseHealth + (wave - 1) * 8f);
-            }
+            // Danno proiettile criogenico scalato per wave (+12% per wave)
+            _projectileDamage = 8f * (1f + (wave - 1) * 0.12f);
 
             _state       = IceBacteriumState.Chasing;
             _shootTimer  = Random.Range(0.2f, 0.7f); // Inizia a sparare quasi subito dopo lo spawn
@@ -260,7 +260,7 @@ namespace MobileGame.Entities
                     Vector2 toPlayer = (Vector2)_playerTransform.position - _rb.position;
                     if (toPlayer.sqrMagnitude > 0.001f) launchDir = toPlayer.normalized;
                 }
-                proj.Launch(_rb.position, launchDir, s_returnProjCallback);
+                proj.Launch(_rb.position, launchDir, s_returnProjCallback, _projectileDamage);
             }
 
             // Ripristina stato di inseguimento

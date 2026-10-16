@@ -26,11 +26,19 @@ namespace MobileGame.UI
         private void Awake()
         {
             _tmp = GetComponent<TextMeshPro>();
-            _tmp.alignment   = TextAlignmentOptions.Center;
-            _tmp.sortingOrder = 10; // Sopra a sprite nemici ed arena
-            _tmp.outlineWidth = 0.28f;
-            _tmp.outlineColor = Color.black;
-            _baseScale       = transform.localScale;
+            if (_tmp != null)
+            {
+                if (_tmp.font == null)
+                {
+                    var font = DamageNumberManager.GetFontAsset();
+                    if (font != null) _tmp.font = font;
+                }
+                _tmp.alignment    = TextAlignmentOptions.Center;
+                _tmp.sortingOrder = 10; // Sopra a sprite nemici ed arena
+                _tmp.outlineWidth = 0.28f;
+                _tmp.outlineColor = Color.black;
+            }
+            _baseScale = transform.localScale;
         }
 
         /// <summary>

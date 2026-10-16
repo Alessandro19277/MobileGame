@@ -17,7 +17,7 @@ namespace MobileGame.Player
         public static PlayerController Instance { get; private set; }
 
         [Header("Movimento")]
-        [SerializeField] private float _speed = 4.2f;
+        [SerializeField] private float _speed = 3.4f;
 
         // Pre-cachati in Awake (AGENTS.md §4)
         private Rigidbody2D     _rb;
@@ -40,6 +40,9 @@ namespace MobileGame.Player
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+
+            // Velocità controllata (3.4f) per dare un feeling più tattico e cadenzato
+            if (_speed > 3.4f) _speed = 3.4f;
 
             _rb             = GetComponent<Rigidbody2D>();
             _health         = GetComponent<HealthComponent>();

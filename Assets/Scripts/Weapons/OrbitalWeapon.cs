@@ -16,9 +16,9 @@ namespace MobileGame.Weapons
         [SerializeField] private GameObject _orbitalPrefab;
 
         [Header("Parametri Base")]
-        [SerializeField] private float _baseRadius        = 1.8f;
-        [SerializeField] private float _baseRotationSpeed = 160f;
-        [SerializeField] private float _baseDamage        = 20f;
+        [SerializeField] private float _baseRadius        = 1.7f;
+        [SerializeField] private float _baseRotationSpeed = 150f;
+        [SerializeField] private float _baseDamage        = 15f;
 
         public int  Level      { get; private set; } = 0; // 0 = non ancora sbloccata
         public int  MaxLevel   => 4;
@@ -71,8 +71,8 @@ namespace MobileGame.Weapons
 
             // Numero sfere in base al livello: Lv1=2, Lv2=3, Lv3=4, Lv4=5
             int count        = Level + 1;
-            float currentRadius = _baseRadius + (Level - 1) * 0.15f;
-            float currentDmg    = _baseDamage + (Level - 1) * 7f;
+            float currentRadius = _baseRadius + (Level - 1) * 0.12f;
+            float currentDmg    = _baseDamage + (Level - 1) * 4f;
 
             float stepAngle = (2f * Mathf.PI) / count;
 

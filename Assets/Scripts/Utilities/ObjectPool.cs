@@ -32,7 +32,7 @@ namespace MobileGame.Utilities
             for (int i = 0; i < initialCapacity; i++)
             {
                 T obj = _factory();
-                _onRelease(obj);
+                _onRelease?.Invoke(obj);
                 _stack.Push(obj);
             }
         }
@@ -41,15 +41,21 @@ namespace MobileGame.Utilities
         public T Get()
         {
             T obj = _stack.Count > 0 ? _stack.Pop() : _factory();
-            _onGet(obj);
+            _onGet?.Invoke(obj);
             return obj;
         }
 
-        /// <summary>Restituisce un oggetto al pool.</summary>
+        /// <summary>Restituisce un oggetto al pool in sicurezza.</summary>
         public void Release(T obj)
         {
-            _onRelease(obj);
-            _stack.Push(obj);
+            if (obj == null) return;
+
+            _onRelease?.Invoke(obj);
+
+            if (!_stack.Contains(obj))
+            {
+                _stack.Push(obj);
+            }
         }
     }
 }

@@ -61,7 +61,6 @@ namespace MobileGame.Editor
             // 2. Configura le impostazioni per produrre un file .apk (non .aab)
             EditorUserBuildSettings.buildAppBundle = false;
             EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
-            EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Disabled;
 
             // 3. Verifica package name e orientamento
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, PACKAGE_NAME);
